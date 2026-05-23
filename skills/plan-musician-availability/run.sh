@@ -30,7 +30,7 @@ python3 - \
   "${MATRIX_HOMESERVER}" \
   "${MATRIX_TOKEN}" \
   "$@" <<'PYEOF'
-import sys, json, re, calendar, datetime
+import sys, os, json, re, calendar, datetime
 from urllib.request import urlopen, Request
 from urllib.parse import quote as url_quote
 from urllib.error import HTTPError
@@ -172,7 +172,7 @@ all_msgs.sort()
 # ── 8. Find request timestamp (first coordinator message mentioning the quarter)
 # Coordinator = the account whose GUID is in MATRIX_USER env
 coord_guid_match = GUID_RE.match(
-    __import__('os').environ.get("MATRIX_USER","")
+    os.environ.get("MATRIX_USER","")
 )
 coord_guid = coord_guid_match.group(1).lower() if coord_guid_match else None
 
@@ -189,8 +189,59 @@ responses_raw = [(ts, guid, body) for ts, guid, body in all_msgs if ts > request
 guid_to_msgs = {}
 for ts, guid, body in responses_raw:
     guid_to_msgs.setdefault(guid, []).append(body)
+group_responders = set(guid_to_msgs.keys())
 
-# ── 9. Render output ──────────────────────────────────────────────────────
+# ── 9. Collect responses from direct messages ─────────────────────────────
+print("Looking up direct message rooms with musicians …", file=sys.stderr)
+dm_responders = set()
+matrix_user = os.environ.get("MATRIX_USER", "")
+enc_mx_user = url_quote(matrix_user, safe="") if matrix_user else ""
+if enc_mx_user:
+    try:
+        dm_data = mx(f"/_matrix/client/v3/user/{enc_mx_user}/account_data/m.direct")
+    except Exception:
+        dm_data = {}
+
+    musician_dm_rooms = []   # (guid, room_id) — all rooms for each musician
+    for user_id, room_ids in dm_data.items():
+        mo = GUID_RE.match(user_id)
+        if not mo:
+            continue
+        guid = mo.group(1).lower()
+        if guid not in guid_info:
+            continue
+        for room_id in room_ids:
+            musician_dm_rooms.append((guid, room_id))
+
+    print(f"Scanning {len(musician_dm_rooms)} DM room(s) …", file=sys.stderr)
+    for guid, room_id in musician_dm_rooms:
+        enc_dm = url_quote(room_id, safe="")
+        try:
+            dm_chunk = mx(f"/_matrix/client/v3/rooms/{enc_dm}/messages?limit=200&dir=b")
+        except Exception:
+            continue
+        for e in dm_chunk.get("chunk", []):
+            if e.get("type") != "m.room.message":
+                continue
+            c = e.get("content", {})
+            if c.get("msgtype") != "m.text":
+                continue
+            ts = e["origin_server_ts"]
+            if ts <= request_ts:
+                continue
+            sender_mo = GUID_RE.match(e.get("sender", ""))
+            if not sender_mo:
+                continue
+            msg_guid = sender_mo.group(1).lower()
+            if msg_guid == coord_guid:
+                continue
+            body = c.get("body", "")
+            if body.startswith("> "):
+                continue
+            guid_to_msgs.setdefault(msg_guid, []).append(body)
+            dm_responders.add(msg_guid)
+
+# ── 10. Render output ─────────────────────────────────────────────────────
 SPECIAL_KW = ["Abendmahl","Taufe","Schulanfänger","Livestream","Erntedank"]
 WEEKDAYS_DE = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 
@@ -240,7 +291,15 @@ print()
 for guid, info in responded:
     msgs = guid_to_msgs[guid]
     groups_str = ", ".join(info["groups"])
-    print(f"{info['name']} [{groups_str}]:")
+    in_group = guid in group_responders
+    in_dm    = guid in dm_responders
+    if in_group and in_dm:
+        src = " [Gruppe + DM]"
+    elif in_dm:
+        src = " [DM]"
+    else:
+        src = ""
+    print(f"{info['name']} [{groups_str}]{src}:")
     for msg in msgs:
         for line in msg.strip().splitlines():
             print(f"  {line}")
