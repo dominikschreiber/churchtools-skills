@@ -57,6 +57,17 @@ bash skills/request-musician-availability/run.sh         # next quarter
 bash skills/request-musician-availability/run.sh Q4/26   # specific quarter
 ```
 
+### `plan-musician-availability`
+
+Collects availability replies from the Musiker Matrix chat, cross-references them with the active musician sub-groups ("Aktive Pianisten", "Aktive Sänger", etc.) for instrument data, and outputs structured data for an AI agent to produce an availability table and concrete band formation suggestions — respecting each musician's stated frequency constraints (1x/month, every 6–7 weeks, etc.).
+
+Run after replies have come in from `request-musician-availability`.
+
+```bash
+bash skills/plan-musician-availability/run.sh         # next quarter
+bash skills/plan-musician-availability/run.sh Q3/26   # specific quarter
+```
+
 ## Shared library
 
 `skills/lib/ct-matrix-auth.sh` handles ChurchTools→Matrix authentication and is sourced by skills that interact with Matrix. It exchanges the ChurchTools login token for a Matrix access token and exports `MATRIX_TOKEN`, `MATRIX_USER`, and related variables.
