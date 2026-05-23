@@ -1,6 +1,7 @@
 ---
 name: cleanup-past-event-rooms
 description: Cleans up Matrix event rooms whose date has passed by kicking members, pinging admins, and leaving the room. Defaults to dry-run; pass --execute to apply changes.
+depends_on: [lib]
 ---
 
 # cleanup-past-event-rooms

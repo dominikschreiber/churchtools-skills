@@ -1,6 +1,7 @@
 ---
 name: plan-musician-availability
 description: Reads Q3/Q4/… availability responses from the Musiker Matrix chat, cross-references them with ChurchTools group members and their instruments, and prints an availability table plus suggested band formations for each service.
+depends_on: [lib]
 ---
 
 # plan-musician-availability

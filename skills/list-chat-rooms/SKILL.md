@@ -1,6 +1,7 @@
 ---
 name: list-chat-rooms
 description: Lists all Matrix rooms visible to the authenticated ChurchTools user, including rooms not exposed through the ChurchTools /api/chat endpoint
+depends_on: [lib]
 ---
 
 # list-chat-rooms
