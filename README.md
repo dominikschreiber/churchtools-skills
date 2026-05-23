@@ -2,6 +2,15 @@
 
 Shell scripts for automating ChurchTools administration tasks, with a focus on Matrix chat room management and musician coordination.
 
+> [!NOTE]
+> These skills are highly tailored to the specific setup and workflows at [FeG Limburg](https://feg-limburg.de). They may not work out of the box for other ChurchTools instances without adaptation.
+
+## Installation
+
+```bash
+npx skills add dominikschreiber/churchtools-skills
+```
+
 ## Prerequisites
 
 - `curl` and `python3` available in `PATH`
