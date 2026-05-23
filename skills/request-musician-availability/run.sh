@@ -24,6 +24,12 @@ from urllib.request import urlopen
 base_url, token = sys.argv[1], sys.argv[2]
 args = sys.argv[3:]
 
+whoami_url = f"{base_url}/api/whoami?login_token={token}"
+with urlopen(whoami_url) as r:
+    person = json.load(r)["data"]
+coordinator_first = person.get("firstName", "")
+coordinator_name = f"{person.get('firstName', '')} {person.get('lastName', '')}".strip()
+
 today = datetime.date.today()
 
 if len(args) == 0:
@@ -116,7 +122,7 @@ deadline = today + datetime.timedelta(days=7 + days_to_sunday)
 def fd(d):
     return f"{d.day}.{d.month}."
 
-print(f"[Musik-Planungs-Wünsche für {q_label} bitte bis {fd(deadline)} an Dominik; von Dominik Schreiber; am {fd(today)}{str(today.year)[2:]}]")
+print(f"[Musik-Planungs-Wünsche für {q_label} bitte bis {fd(deadline)} an {coordinator_first}; von {coordinator_name}; am {fd(today)}{str(today.year)[2:]}]")
 print()
 
 n = len(services)
@@ -126,7 +132,7 @@ for _, sp in services:
         if s not in all_specials:
             all_specials.append(s)
 specials_note = f", davon besondere Gottesdienste: {', '.join(all_specials)}" if all_specials else ""
-print(f"_tl;dr: {n} Gottesdienste in {q_label}{specials_note}; Planungs-Wünsche bitte bis {fd(deadline)} an Dominik_")
+print(f"_tl;dr: {n} Gottesdienste in {q_label}{specials_note}; Planungs-Wünsche bitte bis {fd(deadline)} an {coordinator_first}_")
 print()
 print("Hallo ihr lieben Musiker:innen,")
 print()
@@ -149,5 +155,5 @@ print()
 print(f"Den fertigen Plan bekommt ihr dann gegen Ende {MONTHS[deadline.month-1]}.")
 print()
 print("Liebe Grüße")
-print("Dominik")
+print(coordinator_first)
 PYEOF

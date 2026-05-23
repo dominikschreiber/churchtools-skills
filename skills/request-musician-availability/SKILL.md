@@ -65,10 +65,10 @@ Special services are identified by keywords in the event name or description:
 ## Example output
 
 ```
-[Musik-Planungs-Wünsche für Q3/26 bitte bis 2.6. an Dominik; von Dominik Schreiber; am 23.5.26]
+[Musik-Planungs-Wünsche für Q3/26 bitte bis 2.6. an Jane; von Jane Doe; am 23.5.26]
 
 _tl;dr: 13 Gottesdienste in Q3/26, davon besondere Gottesdienste: Abendmahl,
-Schulanfängergottesdienst; Planungs-Wünsche bitte bis 2.6. an Dominik_
+Schulanfängergottesdienst; Planungs-Wünsche bitte bis 2.6. an Jane_
 
 Hallo ihr lieben Musiker:innen,
 
